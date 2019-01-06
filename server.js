@@ -38,6 +38,13 @@ app.post("/block", async (req, res, next) => {
 
   try {
     const result = await blockchain.addBlock(data);
+
+    // addBlock returns array with length 2 [key, value]
+    // if 2 are not returned something went wrong
+    if (result.length != 2) {
+      throw new Error("Something went wrong while adding block");
+    }
+
     const newBlock = JSON.parse(result[1]);
     res.send(newBlock);
   } catch (err) {
