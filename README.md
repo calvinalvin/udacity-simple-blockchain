@@ -136,4 +136,4 @@ POST to `http://localhost:8000/block` With the request payload:
 }
 ```
 
-The response for the endpoint is a block object in JSON format.
+The response for the endpoint is a block object of the block that was newly created.
