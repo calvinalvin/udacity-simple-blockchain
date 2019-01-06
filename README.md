@@ -78,7 +78,7 @@ blockchain.validateChain();
 
 ## Web Service API
 
-The blockchain also exposes a web api service to interact with the blockchain.
+The blockchain also exposes a web api service to interact with the blockchain. The web service is written in expressjs. (See expressjs docs for more info: https://expressjs.com)
 
 #### How to run the web service
 
@@ -88,7 +88,7 @@ To run the service, simply run:
 node server.js
 ```
 
-This will boot the web service. You can test out the service by pasting `http://localhost:8000` into your browser. You should see the message 'Server up!'.
+This will boot the web service. By default the service will run on your localhost port `8000`. You can test out the service by pasting `http://localhost:8000` into your browser. You should see the message 'Server up!'.
 
 #### Available endpoints
 
