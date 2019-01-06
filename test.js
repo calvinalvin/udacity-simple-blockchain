@@ -1,5 +1,4 @@
-const { Block, Blockchain } = require("./simpleChain");
-
+const { Block, Blockchain } = require("./lib/simpleChain");
 const myBlockChain = new Blockchain();
 
 (function theLoop(i) {
@@ -8,7 +7,7 @@ const myBlockChain = new Blockchain();
     myBlockChain.addBlock(blockTest).then(result => {
       console.log(`Added: `, result);
       i++;
-      if (i < 20) {
+      if (i < 10) {
         theLoop(i);
       } else {
         console.log("Running chain validation ......");
