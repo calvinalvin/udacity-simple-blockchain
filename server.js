@@ -2,10 +2,12 @@ const express = require("express");
 const util = require("util");
 const bodyParser = require("body-parser");
 const { Blockchain } = require("./lib/simpleChain");
+const Mempool = require('./lib/mempool');
 const app = express();
 const port = 8000;
 
 const blockchain = new Blockchain();
+const mempool = new Mempool();
 
 // parse application/json
 app.use(bodyParser.json());
@@ -51,6 +53,26 @@ app.post("/block", async (req, res, next) => {
     next(err);
   }
 });
+
+app.post('/requestValidation', async(req, res, next) => {
+  const data = req.body;
+  console.log('data from request ---- ', data);
+  if (!data.address) {
+    next(new Error("address is missing from request"));
+  }
+ 
+//  try {
+    console.log("blockchain.isInitialized ---- ", blockchain);
+    console.log("mempool ---- ", mempool);
+    console.log("mempool.timeoutRequestWindow-----", mempool.timeoutRequestWindow);
+    let result = mempool.addRequestValidation(data.address);
+    console.log("requestValidation add ----", result);
+    res.json(result);
+ // } catch (err) {
+   // next(err);
+  //}
+  
+ });
 
 app.use(async (err, req, res, next) => {
   res.status(422).json({
