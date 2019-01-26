@@ -19,12 +19,8 @@ app.get("/", (req, res) => {
 app.get("/block/:blockHeight", async (req, res, next) => {
   const blockHeight = req.params.blockHeight;
 
-  try {
-    const block = await blockchain.getBlock(blockHeight);
-    res.json(block);
-  } catch (err) {
-    next(err);
-  }
+  const block = await blockchain.getBlock(blockHeight);
+  res.json(block);
 });
 
 app.post("/block", async (req, res, next) => {
@@ -38,41 +34,66 @@ app.post("/block", async (req, res, next) => {
     next(new Error("block data is missing body"));
   }
 
-  try {
-    const result = await blockchain.addBlock(data);
+  const result = await blockchain.addBlock(data);
 
-    // addBlock returns array with length 2 [key, value]
-    // if 2 are not returned something went wrong
-    if (result.length != 2) {
-      throw new Error("Something went wrong while adding block");
-    }
-
-    const newBlock = JSON.parse(result[1]);
-    res.send(newBlock);
-  } catch (err) {
-    next(err);
+  // addBlock returns array with length 2 [key, value]
+  // if 2 are not returned something went wrong
+  if (result.length != 2) {
+    throw new Error("Something went wrong while adding block");
   }
+
+  const newBlock = JSON.parse(result[1]);
+  res.json(newBlock);
 });
 
 app.post('/requestValidation', async(req, res, next) => {
   const data = req.body;
-  console.log('data from request ---- ', data);
+  
   if (!data.address) {
     next(new Error("address is missing from request"));
   }
  
-//  try {
-    console.log("blockchain.isInitialized ---- ", blockchain);
-    console.log("mempool ---- ", mempool);
-    console.log("mempool.timeoutRequestWindow-----", mempool.timeoutRequestWindow);
-    let result = mempool.addRequestValidation(data.address);
-    console.log("requestValidation add ----", result);
-    res.json(result);
- // } catch (err) {
-   // next(err);
-  //}
-  
- });
+  let result = mempool.addRequestValidation(data.address);
+  res.json(result);
+});
+
+app.post('/validateSignature', async(req, res, next) => {
+  const data = req.body;
+
+  if (!data.address) {
+    next(new Error('address is missing from request'));
+  }
+
+  if (!data.signature) {
+    next(new Error('signature is missing from request'));
+  }
+
+  let isValid = false;
+  let validationRequest = mempool.getValidationRequest(data.address);
+
+  if (validationRequest) {
+    isValid = mempool.validateRequestByWallet(data.address, validationRequest.message, data.signature);
+ 
+    if (!isValid) {
+      next(new Error('signature is invalid'));
+    }
+
+    res.json({
+      registerStar: true,
+      status: {
+        address: validationRequest.walletAddress,
+        requestTimestamp: validationRequest.requestTimestamp,
+        message: validationRequest.message,
+        messageSignature: isValid,
+        validationWindow: validationRequest.validationWindow
+      }
+    });
+
+  } else {
+    next(new Error('validation request for that wallet address not found'));
+  }
+
+});
 
 app.use(async (err, req, res, next) => {
   res.status(422).json({
