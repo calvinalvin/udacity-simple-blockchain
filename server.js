@@ -1,7 +1,7 @@
 const express = require("express");
 const util = require("util");
 const bodyParser = require("body-parser");
-const { Blockchain } = require("./lib/simpleChain");
+const { Block, Blockchain } = require("./lib/simpleChain");
 const Mempool = require('./lib/mempool');
 const app = express();
 const port = 8000;
@@ -28,17 +28,39 @@ app.get("/block/:blockHeight", async (req, res, next) => {
  });
 
 app.post("/block", async (req, res, next) => {
-  try {
+  //try {
     const data = req.body;
 
+    console.log("data is -0----- ", data);
+
     if (!data) {
-       next(new Error("block data is missing"));
+      throw new Error("Block data is missing");
     }
 
-    if (data.body === null || data.body === undefined) {
-       next(new Error("block data is missing body"));
+    if (!data.address) {
+      throw new Error("Address is missing"); 
     }
 
+    if (!data.star) {
+      throw new Error("Star data is missing");
+    }
+
+    let addressIsVerified = mempool.verifyAddressRequest(data.address);
+
+    if (!addressIsVerified) {
+      throw new Error("Address has not been verified so star will not be added. You miust go through the validation process first.");
+    }
+
+    let blockData = {
+      address: data.address,
+      star: {
+        ra: data.star.ra,
+        dec: data.star.dec,
+        story: Buffer(data.star.story).toString('hex')
+      }
+    }
+
+    let block = new Block(blockData);
     const result = await blockchain.addBlock(data);
 
     // addBlock returns array with length 2 [key, value]
@@ -49,9 +71,9 @@ app.post("/block", async (req, res, next) => {
 
     const newBlock = JSON.parse(result[1]);
     res.json(newBlock);
-  } catch (e) {
+  //} catch (e) {
     next(e);
-  }
+  //}
 
 });
 
@@ -71,7 +93,7 @@ app.post('/requestValidation', async(req, res, next) => {
 
 });
 
-app.post('/validateSignature', async(req, res, next) => {
+app.post('/message-signature/validate', async(req, res, next) => {
   try {
     const data = req.body;
 
