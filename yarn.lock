@@ -455,6 +455,10 @@ hash.js@^1.0.0, hash.js@^1.0.3:
     inherits "^2.0.3"
     minimalistic-assert "^1.0.1"
 
+hex2ascii@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/hex2ascii/-/hex2ascii-0.0.3.tgz#2dab08bad5a34430dd5cc751271eac4a90eae8fa"
+
 hmac-drbg@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/hmac-drbg/-/hmac-drbg-1.0.1.tgz#d2745701025a6c775a6c545793ed502fc0c649a1"
