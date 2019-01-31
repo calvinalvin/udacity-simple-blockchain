@@ -75,7 +75,6 @@ app.post("/block", handler(async (req, res, next) => {
   }
 
   let block = new Block(blockData);
-
   const result = await blockchain.addBlock(block);
 
   // addBlock returns array with length 2 [key, value]
@@ -83,7 +82,9 @@ app.post("/block", handler(async (req, res, next) => {
   if (result.length != 2) {
     throw new Error("Something went wrong while adding block");
   }
-
+  
+  // remove adddress from mempool so they need to go through flow again
+  mempool.deregisterValidAddress(blockData.address);
   const newBlock = JSON.parse(result[1]);
   res.json(newBlock);
 }));
@@ -117,6 +118,7 @@ app.post('/message-signature/validate', handler(async(req, res, next) => {
 app.get('/stars/hash::hash', handler(async(req, res, next) => { 
   let block = await blockchain.getBlockByHash(req.params.hash);
   if (block) {
+    block.body.star.storyDecoded = hex2ascii(block.body.star.story);
     res.json(block);
   }
   else {
@@ -126,6 +128,11 @@ app.get('/stars/hash::hash', handler(async(req, res, next) => {
 
 app.get('/stars/address::address', handler(async(req, res, next) => {
   let blocks = await blockchain.getBlocksForWalletAddress(req.params.address);
+
+  blocks.forEach(b => {
+    b.body.star.storyDecoded = hex2ascii(b.body.star.story);
+  });
+
   res.json(blocks);
 }));
 
